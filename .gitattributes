@@ -1,0 +1,6 @@
+# Ensure sensitive files are never committed
+.env* filter=git-crypt diff=git-crypt
+*.key filter=git-crypt diff=git-crypt
+*.pem filter=git-crypt diff=git-crypt
+*.db filter=git-crypt diff=git-crypt
+*.sqlite* filter=git-crypt diff=git-crypt

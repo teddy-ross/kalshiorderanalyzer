@@ -1,0 +1,50 @@
+.order-flow-table {
+  background: #1a1f3a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.order-flow-table h2 {
+  margin-bottom: 1rem;
+  color: #e0e0e0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.order-flow-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-flow-table thead {
+  background: #0f1322;
+}
+
+.order-flow-table th {
+  padding: 0.75rem;
+  text-align: left;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.order-flow-table td {
+  padding: 0.75rem;
+  border-top: 1px solid #2d3748;
+  color: #e0e0e0;
+}
+
+.order-flow-table tr:hover {
+  background: #252b3f;
+}
+
+.order-flow-table code {
+  background: #0f1322;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
