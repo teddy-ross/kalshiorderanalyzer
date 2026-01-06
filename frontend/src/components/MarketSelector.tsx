@@ -17,6 +17,7 @@ export const MarketSelector: React.FC<MarketSelectorProps> = ({
 
   useEffect(() => {
     loadMarkets();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadMarkets = async () => {

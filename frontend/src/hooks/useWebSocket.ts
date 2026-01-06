@@ -5,7 +5,7 @@ export function useWebSocket(url: string) {
   const [orderFlows, setOrderFlows] = useState<OrderFlow[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const connect = () => {
@@ -14,7 +14,7 @@ export function useWebSocket(url: string) {
         wsRef.current = ws;
 
         ws.onopen = () => {
-          console.log('✅ WebSocket connected');
+          console.log('WebSocket connected');
           setIsConnected(true);
           if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
@@ -26,7 +26,7 @@ export function useWebSocket(url: string) {
           try {
             const message = JSON.parse(event.data);
             if (message.type === 'orderFlow') {
-              setOrderFlows((prev) => [message.data, ...prev].slice(0, 1000));
+              setOrderFlows((prev: OrderFlow[]) => [message.data, ...prev].slice(0, 1000));
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -39,7 +39,7 @@ export function useWebSocket(url: string) {
         };
 
         ws.onclose = () => {
-          console.log('🔌 WebSocket disconnected');
+          console.log('WebSocket disconnected');
           setIsConnected(false);
           // Reconnect after 3 seconds
           reconnectTimeoutRef.current = setTimeout(() => {
@@ -55,11 +55,13 @@ export function useWebSocket(url: string) {
     connect();
 
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
       }
     };
   }, [url]);

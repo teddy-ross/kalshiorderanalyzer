@@ -16,6 +16,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ marketTicker }) => {
       const interval = setInterval(loadStats, 30000); // Refresh every 30 seconds
       return () => clearInterval(interval);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketTicker]);
 
   const loadStats = async () => {

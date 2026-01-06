@@ -18,7 +18,7 @@ export class OrderFlowMonitor extends EventEmitter {
   }
 
   async startMonitoring(marketTickers: string[] = []) {
-    console.log('🚀 Starting order flow monitoring...');
+    console.log('Starting order flow monitoring...');
 
     // Add markets to monitor
     marketTickers.forEach(ticker => this.monitoredMarkets.add(ticker));
@@ -32,7 +32,7 @@ export class OrderFlowMonitor extends EventEmitter {
             this.monitoredMarkets.add(market.ticker);
           }
         });
-        console.log(`📊 Monitoring ${this.monitoredMarkets.size} markets`);
+        console.log(`Monitoring ${this.monitoredMarkets.size} markets`);
       } catch (error) {
         console.error('Error fetching markets:', error);
       }
@@ -76,7 +76,7 @@ export class OrderFlowMonitor extends EventEmitter {
         if (!isDuplicate) {
           this.db.insertOrderFlow(orderFlow);
           this.emit('orderFlow', orderFlow);
-          console.log(`📈 New trade: ${ticker} ${orderFlow.side} @ ${orderFlow.price} x ${orderFlow.size}`);
+          console.log(`New trade: ${ticker} ${orderFlow.side} @ ${orderFlow.price} x ${orderFlow.size}`);
         }
       }
     } catch (error) {
@@ -158,12 +158,12 @@ export class OrderFlowMonitor extends EventEmitter {
 
   addMarket(ticker: string) {
     this.monitoredMarkets.add(ticker);
-    console.log(`➕ Added market to monitor: ${ticker}`);
+    console.log(`Added market to monitor: ${ticker}`);
   }
 
   removeMarket(ticker: string) {
     this.monitoredMarkets.delete(ticker);
-    console.log(`➖ Removed market from monitor: ${ticker}`);
+    console.log(`Removed market from monitor: ${ticker}`);
   }
 
   getMonitoredMarkets(): string[] {
@@ -183,6 +183,6 @@ export class OrderFlowMonitor extends EventEmitter {
       this.ws.close();
       this.ws = null;
     }
-    console.log('🛑 Order flow monitoring stopped');
+    console.log('Order flow monitoring stopped');
   }
 }

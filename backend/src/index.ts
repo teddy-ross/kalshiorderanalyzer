@@ -42,11 +42,11 @@ const monitor = new OrderFlowMonitor(kalshiService, db);
 const clients = new Set<any>();
 
 wss.on('connection', (ws) => {
-  console.log('🔌 New WebSocket client connected');
+  console.log('New WebSocket client connected');
   clients.add(ws);
 
   ws.on('close', () => {
-    console.log('🔌 WebSocket client disconnected');
+    console.log('WebSocket client disconnected');
     clients.delete(ws);
   });
 
@@ -89,8 +89,8 @@ async function start() {
 
     // Start server
     server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📡 WebSocket server ready for connections`);
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`WebSocket server ready for connections`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -100,11 +100,11 @@ async function start() {
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down...');
+  console.log('\nShutting down...');
   monitor.stop();
   db.close();
   server.close(() => {
-    console.log('✅ Server closed');
+    console.log('Server closed');
     process.exit(0);
   });
 });

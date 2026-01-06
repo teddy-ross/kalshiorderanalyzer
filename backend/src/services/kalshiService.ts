@@ -18,9 +18,9 @@ export class KalshiService {
       // Test connection by getting portfolio
       await this.client.getPortfolio();
       this.isConnected = true;
-      console.log('✅ Connected to Kalshi API');
+      console.log('Connected to Kalshi API');
     } catch (error) {
-      console.error('❌ Failed to connect to Kalshi API:', error);
+      console.error('Failed to connect to Kalshi API:', error);
       throw error;
     }
   }

@@ -51,8 +51,12 @@ export const OrderFlowTable: React.FC<OrderFlowTableProps> = ({ orderFlows }) =>
                 </td>
               </tr>
             ) : (
-              orderFlows.map((flow, index) => (
-                <tr key={flow.id || index}>
+              orderFlows.map((flow, index) => {
+                const uniqueKey = flow.id 
+                  ? `flow-${flow.id}` 
+                  : `flow-${flow.timestamp}-${flow.market_ticker}-${flow.side}-${flow.action}-${index}`;
+                return (
+                <tr key={uniqueKey}>
                   <td>{formatTime(flow.timestamp)}</td>
                   <td>
                     <code>{flow.market_ticker}</code>
@@ -80,7 +84,8 @@ export const OrderFlowTable: React.FC<OrderFlowTableProps> = ({ orderFlows }) =>
                   <td>${flow.price.toFixed(2)}</td>
                   <td>{flow.size}</td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
