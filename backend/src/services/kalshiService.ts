@@ -1,22 +1,34 @@
-import { KalshiClient } from '@kalshi/kalshi-js';
+import { ExchangeInstance, Configuration, MarketApi, PortfolioApi, ExchangeApi } from 'kalshi-typescript';
 import { OrderFlow } from '../database/schema.js';
 
 export class KalshiService {
-  private client: KalshiClient;
+  private exchange: ExchangeInstance;
+  private marketApi: MarketApi;
+  private portfolioApi: PortfolioApi;
+  private exchangeApi: ExchangeApi;
   private isConnected: boolean = false;
 
   constructor(apiKey: string, privateKey: string, environment: string = 'prod') {
-    this.client = new KalshiClient({
-      apiKey,
-      privateKey,
-      environment: environment as 'demo' | 'prod',
+    const baseUrl = environment === 'demo' 
+      ? 'https://demo-api.kalshi.com/trade-api/v2'
+      : 'https://trading-api.kalshi.com/trade-api/v2';
+    
+    const config = new Configuration({
+      apiKey: apiKey,
+      privateKey: privateKey,
+      basePath: baseUrl,
     });
+
+    this.exchange = new ExchangeInstance(config);
+    this.marketApi = new MarketApi(config);
+    this.portfolioApi = new PortfolioApi(config);
+    this.exchangeApi = new ExchangeApi(config);
   }
 
   async connect(): Promise<void> {
     try {
       // Test connection by getting portfolio
-      await this.client.getPortfolio();
+      await this.portfolioApi.getPortfolio();
       this.isConnected = true;
       console.log('Connected to Kalshi API');
     } catch (error) {
@@ -27,7 +39,7 @@ export class KalshiService {
 
   async getMarkets(limit: number = 50): Promise<any[]> {
     try {
-      const response = await this.client.getMarkets({ limit });
+      const response = await this.marketApi.getMarkets({ limit });
       return response.markets || [];
     } catch (error) {
       console.error('Error fetching markets:', error);
@@ -37,7 +49,7 @@ export class KalshiService {
 
   async getMarket(ticker: string): Promise<any> {
     try {
-      const response = await this.client.getMarket({ ticker });
+      const response = await this.marketApi.getMarket({ ticker });
       return response.market;
     } catch (error) {
       console.error(`Error fetching market ${ticker}:`, error);
@@ -47,7 +59,7 @@ export class KalshiService {
 
   async getOrderBook(ticker: string): Promise<any> {
     try {
-      const response = await this.client.getOrderBook({ ticker });
+      const response = await this.marketApi.getOrderBook({ ticker });
       return response;
     } catch (error) {
       console.error(`Error fetching order book for ${ticker}:`, error);
@@ -57,7 +69,7 @@ export class KalshiService {
 
   async getTrades(ticker: string, limit: number = 100): Promise<any[]> {
     try {
-      const response = await this.client.getTrades({ ticker, limit });
+      const response = await this.marketApi.getTrades({ ticker, limit });
       return response.trades || [];
     } catch (error) {
       console.error(`Error fetching trades for ${ticker}:`, error);
@@ -119,8 +131,8 @@ export class KalshiService {
     return orderFlows;
   }
 
-  getClient(): KalshiClient {
-    return this.client;
+  getClient(): ExchangeInstance {
+    return this.exchange;
   }
 
   getIsConnected(): boolean {
