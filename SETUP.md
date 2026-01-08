@@ -16,15 +16,11 @@
      KALSHI_ENVIRONMENT=demo
      ```
 
-3. **Install Kalshi SDK:**
-   The Kalshi TypeScript SDK package name may vary. Check the official Kalshi documentation for the correct package name:
-   - Visit: https://docs.kalshi.com/sdks/overview
-   - Install the TypeScript SDK in the backend directory:
-     ```bash
-     cd backend
-     npm install @kalshi/kalshi-js
-     # OR the package name might be different - check Kalshi docs
-     ```
+3. **Verify dependencies:**
+   The Kalshi TypeScript SDK is already included in `package.json`:
+   - Package: `kalshi-typescript` (v3.4.0+)
+   - Database: `sql.js` (v1.13.0+) - SQLite compiled to WebAssembly
+   - No additional installation needed after running `npm run install:all`
 
 4. **Start the application:**
    ```bash
@@ -40,12 +36,12 @@
 
 ## Troubleshooting
 
-### SDK Installation Issues
+### SDK Issues
 
-If the `@kalshi/kalshi-js` package doesn't exist or has a different name:
-1. Check the official Kalshi SDK documentation
-2. The SDK might need to be installed from a different source
-3. You may need to implement direct API calls using axios/fetch with RSA-PSS signing
+The project uses `kalshi-typescript` v3.4.0+ which is already configured:
+1. All API endpoints have been updated to match the latest Kalshi API
+2. Authentication uses API key and private key PEM format
+3. Check the official [Kalshi API documentation](https://docs.kalshi.com) for latest changes
 
 ### Connection Issues
 
@@ -56,9 +52,11 @@ If the `@kalshi/kalshi-js` package doesn't exist or has a different name:
 
 ### Database Issues
 
-- The SQLite database is created automatically
+- The sql.js database (SQLite in WebAssembly) is created automatically
+- Database initialization is async and happens on server startup
 - Ensure the `backend/data/` directory is writable
 - Delete `backend/data/orderflow.db` to reset the database
+- No native compilation required - works on all platforms
 
 ## Development
 

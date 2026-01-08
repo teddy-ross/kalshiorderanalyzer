@@ -5,11 +5,12 @@ A full-stack application for monitoring order flows on the Kalshi prediction mar
 ## Features
 
 - Real-time order flow monitoring via WebSocket
-- Historical order flow data storage (SQLite database)
+- Historical order flow data storage (sql.js - SQLite in-memory/persistent database)
 - Interactive dashboard with live updates
 - Market data visualization
 - Order book tracking
 - Market statistics and analytics
+- Cross-platform compatibility with browser-based SQLite
 
 ## Prerequisites
 
@@ -26,8 +27,8 @@ npm run install:all
 
 This installs dependencies for:
 - Root project (concurrently for running both servers)
-- Backend (Express, SQLite, Kalshi SDK, etc.)
-- Frontend (React, Vite, etc.)
+- Backend (Express, sql.js, Kalshi SDK, WebSockets, etc.)
+- Frontend (React, Vite, TypeScript, etc.)
 
 ### 2. Set Up Environment Variables
 
@@ -97,12 +98,12 @@ The frontend build will be in `frontend/dist/` - serve it with any static file s
 ```
 ├── backend/          # Express API server
 │   ├── src/
-│   │   ├── database/ # SQLite database schema
+│   │   ├── database/ # sql.js database schema & operations
 │   │   ├── services/ # Kalshi API service & order flow monitor
 │   │   ├── routes/   # API routes
 │   │   └── index.ts  # Server entry point
 │   └── .env          # Environment variables (create this)
-├── frontend/         # React frontend
+├── frontend/         # React + TypeScript frontend
 │   └── src/
 │       ├── components/ # React components
 │       ├── hooks/      # React hooks (WebSocket)
@@ -137,19 +138,25 @@ Once running, the backend exposes:
 
 ## Database
 
-The application uses SQLite to store order flow data. The database file is created automatically at `backend/data/orderflow.db`.
+The application uses **sql.js** (SQLite compiled to WebAssembly) to store order flow data. The database file is created automatically at `backend/data/orderflow.db` and is persisted to disk. sql.js provides:
+- Cross-platform compatibility (works in Node.js and browsers)
+- No native compilation required
+- Full SQLite functionality with async initialization
 
 ## Troubleshooting
 
 ### SDK Issues
 If you encounter errors about missing Kalshi SDK packages:
-- The project uses `kalshi-typescript` package (already in dependencies)
+- The project uses `kalshi-typescript` v3.4.0+ (already in dependencies)
+- API endpoints have been updated to match the latest Kalshi API
 - If methods don't match, check the [Kalshi API documentation](https://docs.kalshi.com/sdks/overview)
 
 ### Database Issues
-- The SQLite database is created automatically at `backend/data/orderflow.db`
+- The sql.js database is created automatically at `backend/data/orderflow.db`
+- Database initialization is async - the server waits for it to complete
 - Ensure the `backend/data/` directory is writable
 - Delete `backend/data/orderflow.db` to reset the database
+- sql.js requires no native compilation, so it works on all platforms
 
 ### Connection Issues
 - Ensure your API credentials are correct in `backend/.env`
