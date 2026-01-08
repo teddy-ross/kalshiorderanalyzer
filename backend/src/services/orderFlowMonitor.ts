@@ -73,7 +73,7 @@ export class OrderFlowMonitor extends EventEmitter {
           of => of.order_id === orderFlow.order_id && of.action === 'fill'
         );
 
-        if (!isDuplicate) {
+        if (!isDuplicate && orderFlow.order_id) {
           this.db.insertOrderFlow(orderFlow);
           this.emit('orderFlow', orderFlow);
           console.log(`New trade: ${ticker} ${orderFlow.side} @ ${orderFlow.price} x ${orderFlow.size}`);
@@ -88,65 +88,33 @@ export class OrderFlowMonitor extends EventEmitter {
     try {
       const orderBook = await this.kalshiService.getOrderBook(ticker);
       
-      if (orderBook && orderBook.yes) {
-        // Process YES side
-        const yesBids = orderBook.yes.bids || [];
-        const yesAsks = orderBook.yes.asks || [];
-        
+      if (orderBook) {
+        // Process YES bids
+        const yesBids = orderBook.yes || [];
         yesBids.forEach((bid: any) => {
           const orderFlow: OrderFlow = {
             timestamp: Date.now(),
             market_ticker: ticker,
             side: 'yes',
             action: 'bid',
-            price: bid.price,
-            size: bid.count,
+            price: Array.isArray(bid) ? bid[0] : bid.price,
+            size: Array.isArray(bid) ? bid[1] : bid.quantity,
             raw_data: JSON.stringify(bid),
           };
           this.emit('orderFlow', orderFlow);
         });
 
-        yesAsks.forEach((ask: any) => {
-          const orderFlow: OrderFlow = {
-            timestamp: Date.now(),
-            market_ticker: ticker,
-            side: 'yes',
-            action: 'ask',
-            price: ask.price,
-            size: ask.count,
-            raw_data: JSON.stringify(ask),
-          };
-          this.emit('orderFlow', orderFlow);
-        });
-      }
-
-      if (orderBook && orderBook.no) {
-        // Process NO side
-        const noBids = orderBook.no.bids || [];
-        const noAsks = orderBook.no.asks || [];
-        
+        // Process NO bids
+        const noBids = orderBook.no || [];
         noBids.forEach((bid: any) => {
           const orderFlow: OrderFlow = {
             timestamp: Date.now(),
             market_ticker: ticker,
             side: 'no',
             action: 'bid',
-            price: bid.price,
-            size: bid.count,
+            price: Array.isArray(bid) ? bid[0] : bid.price,
+            size: Array.isArray(bid) ? bid[1] : bid.quantity,
             raw_data: JSON.stringify(bid),
-          };
-          this.emit('orderFlow', orderFlow);
-        });
-
-        noAsks.forEach((ask: any) => {
-          const orderFlow: OrderFlow = {
-            timestamp: Date.now(),
-            market_ticker: ticker,
-            side: 'no',
-            action: 'ask',
-            price: ask.price,
-            size: ask.count,
-            raw_data: JSON.stringify(ask),
           };
           this.emit('orderFlow', orderFlow);
         });

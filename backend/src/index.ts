@@ -28,15 +28,10 @@ const DB_PATH = process.env.DB_PATH || join(__dirname, '../data/orderflow.db');
 app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json());
 
-// Initialize services
-const db = new OrderFlowDatabase(DB_PATH);
-const kalshiService = new KalshiService(
-  process.env.KALSHI_API_KEY || '',
-  process.env.KALSHI_PRIVATE_KEY || '',
-  process.env.KALSHI_ENVIRONMENT || 'demo'
-);
-
-const monitor = new OrderFlowMonitor(kalshiService, db);
+// Initialize services (will be initialized in start())
+let db: OrderFlowDatabase;
+let kalshiService: KalshiService;
+let monitor: OrderFlowMonitor;
 
 // WebSocket connections for real-time updates
 const clients = new Set<any>();
@@ -55,32 +50,47 @@ wss.on('connection', (ws) => {
   });
 });
 
-// Broadcast order flow updates to all connected clients
-monitor.on('orderFlow', (orderFlow) => {
-  const message = JSON.stringify({ type: 'orderFlow', data: orderFlow });
-  clients.forEach((client) => {
-    if (client.readyState === 1) { // WebSocket.OPEN
-      client.send(message);
-    }
-  });
-});
-
-// API routes
-app.use('/api', createApiRouter(kalshiService, db, monitor));
-
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: Date.now(),
-    kalshiConnected: kalshiService.getIsConnected(),
-    monitoredMarkets: monitor.getMonitoredMarkets().length
+    kalshiConnected: kalshiService?.getIsConnected() || false,
+    monitoredMarkets: monitor?.getMonitoredMarkets().length || 0
   });
 });
 
 // Initialize and start
 async function start() {
   try {
+    // Initialize database first (async for sql.js)
+    db = new OrderFlowDatabase(DB_PATH);
+    await db.ensureInitialized();
+    console.log('Database initialized');
+
+    // Initialize Kalshi service
+    kalshiService = new KalshiService(
+      process.env.KALSHI_API_KEY || '',
+      process.env.KALSHI_PRIVATE_KEY || '',
+      process.env.KALSHI_ENVIRONMENT || 'demo'
+    );
+
+    // Initialize monitor
+    monitor = new OrderFlowMonitor(kalshiService, db);
+
+    // Setup API routes (after services are initialized)
+    app.use('/api', createApiRouter(kalshiService, db, monitor));
+
+    // Broadcast order flow updates to all connected clients
+    monitor.on('orderFlow', (orderFlow) => {
+      const message = JSON.stringify({ type: 'orderFlow', data: orderFlow });
+      clients.forEach((client) => {
+        if (client.readyState === 1) { // WebSocket.OPEN
+          client.send(message);
+        }
+      });
+    });
+
     // Connect to Kalshi
     await kalshiService.connect();
 
