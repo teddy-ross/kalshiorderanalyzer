@@ -18,69 +18,101 @@ A full-stack application for monitoring order flows on the Kalshi prediction mar
 
 ## Setup
 
-1. **Install dependencies:**
+### 1. Install Dependencies
+
 ```bash
 npm run install:all
 ```
 
-2. **Install Kalshi SDK:**
-   ```bash
-   cd backend
-   npm install @kalshi/kalshi-js
-   ```
-   *Note: If the package name differs, check [Kalshi SDK documentation](https://docs.kalshi.com/sdks/overview)*
+This installs dependencies for:
+- Root project (concurrently for running both servers)
+- Backend (Express, SQLite, Kalshi SDK, etc.)
+- Frontend (React, Vite, etc.)
 
-3. **Configure environment variables:**
-   - Copy `backend/env.example` to `backend/.env`
-   - Add your Kalshi API credentials:
-     ```
-     KALSHI_API_KEY=your_api_key_here
-     KALSHI_PRIVATE_KEY=your_private_key_here
-     KALSHI_ENVIRONMENT=demo  # Use 'demo' for testing, 'prod' for production
-     ```
+### 2. Set Up Environment Variables
 
-4. **Run the application:**
+Create a `.env` file in the `backend/` directory:
+
+```bash
+cd backend
+cp env.example .env
+```
+
+Edit `backend/.env` and add your Kalshi API credentials:
+
+```
+KALSHI_API_KEY=your_api_key_here
+KALSHI_PRIVATE_KEY=your_private_key_here
+KALSHI_ENVIRONMENT=demo
+PORT=3001
+CORS_ORIGIN=http://localhost:5173
+DB_PATH=./data/orderflow.db
+```
+
+**Getting Kalshi API Credentials:**
+1. Create an account at [kalshi.com](https://kalshi.com)
+2. Log in and navigate to Account Settings
+3. Find the API section and generate new API keys
+4. **Important:** Save the private key immediately - it's only shown once!
+
+### 3. Run the Application
+
+**Development mode (runs both backend and frontend):**
 ```bash
 npm run dev
 ```
 
-The backend will run on `http://localhost:3001` and the frontend on `http://localhost:5173`.
+This will:
+- Start the backend server on `http://localhost:3001`
+- Start the frontend dev server on `http://localhost:5173`
+- Open your browser to `http://localhost:5173`
 
-For detailed setup instructions, see [SETUP.md](./SETUP.md).
+**Run backend only:**
+```bash
+npm run dev:backend
+```
+
+**Run frontend only:**
+```bash
+npm run dev:frontend
+```
+
+## Building for Production
+
+### Build both backend and frontend:
+```bash
+npm run build
+```
+
+### Start production backend:
+```bash
+cd backend
+npm start
+```
+
+The frontend build will be in `frontend/dist/` - serve it with any static file server.
 
 ## Project Structure
 
 ```
-├── backend/
+├── backend/          # Express API server
 │   ├── src/
-│   │   ├── database/        # SQLite database schema and operations
-│   │   ├── services/        # Kalshi API service and order flow monitor
-│   │   ├── routes/          # API routes
-│   │   └── index.ts         # Express server entry point
-│   ├── package.json
-│   └── tsconfig.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── services/        # API client
-│   │   ├── hooks/           # React hooks (WebSocket)
-│   │   └── App.tsx
-│   ├── package.json
-│   └── vite.config.ts
-└── README.md
+│   │   ├── database/ # SQLite database schema
+│   │   ├── services/ # Kalshi API service & order flow monitor
+│   │   ├── routes/   # API routes
+│   │   └── index.ts  # Server entry point
+│   └── .env          # Environment variables (create this)
+├── frontend/         # React frontend
+│   └── src/
+│       ├── components/ # React components
+│       ├── hooks/      # React hooks (WebSocket)
+│       └── services/   # API client
+└── package.json       # Root package.json with scripts
 ```
 
-## API Configuration
-
-You'll need to:
-1. Create a Kalshi account at [kalshi.com](https://kalshi.com)
-2. Navigate to Account Settings
-3. Generate API keys (API key and private key)
-4. Add credentials to `backend/.env`
-
-**Note:** The private key is only shown once, so save it securely!
-
 ## API Endpoints
+
+Once running, the backend exposes:
 
 ### Order Flows
 - `GET /api/order-flows` - Get recent order flows
@@ -98,15 +130,36 @@ You'll need to:
 - `POST /api/monitor/markets/:ticker` - Add market to monitor
 - `DELETE /api/monitor/markets/:ticker` - Remove market from monitor
 
-## Development
+### Health
+- `GET /health` - Health check endpoint
 
-- **Backend only:** `npm run dev:backend`
-- **Frontend only:** `npm run dev:frontend`
-- **Build:** `npm run build`
+**WebSocket:** The WebSocket server runs on `ws://localhost:3001` for real-time order flow updates.
 
 ## Database
 
 The application uses SQLite to store order flow data. The database file is created automatically at `backend/data/orderflow.db`.
+
+## Troubleshooting
+
+### SDK Issues
+If you encounter errors about missing Kalshi SDK packages:
+- The project uses `kalshi-typescript` package (already in dependencies)
+- If methods don't match, check the [Kalshi API documentation](https://docs.kalshi.com/sdks/overview)
+
+### Database Issues
+- The SQLite database is created automatically at `backend/data/orderflow.db`
+- Ensure the `backend/data/` directory is writable
+- Delete `backend/data/orderflow.db` to reset the database
+
+### Connection Issues
+- Ensure your API credentials are correct in `backend/.env`
+- Check that `KALSHI_ENVIRONMENT` is set to `demo` for testing
+- Verify your network connection
+- Check backend console logs for detailed error messages
+
+### Port Conflicts
+- Backend default port: `3001` (change in `backend/.env`)
+- Frontend default port: `5173` (Vite will auto-increment if busy)
 
 ## Security
 
